@@ -2,7 +2,11 @@ services:
   - type: web
     name: alum-ishu
     runtime: python
-    buildCommand: pip install -r requirements.txt && cd Almini && python manage.py collectstatic --no-input && python manage.py migrate
+    buildCommand: |
+      pip install -r requirements.txt
+      cd Almini
+      python manage.py collectstatic --no-input
+      python manage.py migrate
     startCommand: cd Almini && gunicorn alumni_portal.wsgi:application
     envVars:
       - key: PYTHON_VERSION
