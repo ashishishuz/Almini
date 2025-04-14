@@ -1,1 +1,1 @@
-web: python manage.py runserver 0.0.0.0:$PORT
+web: cd Almini && gunicorn alumni_portal.wsgi:application
