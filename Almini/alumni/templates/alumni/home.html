@@ -1,0 +1,226 @@
+{% extends 'alumni/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row animate-fade-in">
+    <div class="col-md-8">
+        {% if user.is_authenticated %}
+        <h2 class="welcome-title">
+            {{ greeting }}, <span>{{ user.first_name }} {{ user.last_name }}</span>
+        </h2>
+    {% else %}
+        <h2 class="welcome-title">Welcome! to Alumni Portal</h2>
+    {% endif %}
+        
+        <section class="mt-4 animate-slide-up">
+            <h3 class="section-title">Latest Success Stories</h3>
+            {% if success_stories %}
+                {% for story in success_stories %}
+                    <div class="card mb-3 story-card animate-scale">
+                        <div class="card-body">
+                            <h5 class="card-title gradient-text">{{ story.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">By {{ story.alumni.user.get_full_name }}</h6>
+                            <p class="card-text">{{ story.content|truncatewords:50 }}</p>
+                            <div class="story-footer">
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ story.date_posted|date:"F d, Y" }}
+                                    <span class="ms-3">
+                                        <i class="fas fa-thumbs-up"></i> {{ story.likes.count }}
+                                    </span>
+                                
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="d-flex justify-content-end mb-4">
+                    <a href="{% url 'alumni:success_story_list' %}" class="btn btn-outline-primary btn-glow">
+                        <i class="fas fa-book-open"></i> View All Stories
+                    </a>
+                </div>
+            {% else %}
+                <p class="no-content-message">No success stories yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="mt-4 animate-slide-up">
+            <h3 class="section-title">Upcoming Events</h3>
+            {% if upcoming_events %}
+                {% for event in upcoming_events %}
+                    <div class="card mb-3 event-card animate-scale">
+                        <div class="card-body">
+                            <h5 class="card-title gradient-text">{{ event.title }}</h5>
+                            <div class="event-meta">
+                                <span><i class="fas fa-calendar"></i> {{ event.date|date:"F d, Y" }}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> {{ event.location }}</span>
+                            </div>
+                            <p class="card-text">{{ event.description|truncatewords:30 }}</p>
+                            <a href="{% url 'alumni:event_rsvp' event.id %}" class="btn btn-primary btn-glow">Attend</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-content-message">No upcoming events.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card quick-links-card animate-slide-left">
+            <div class="card-body">
+                <h5 class="card-title gradient-text">Quick Links</h5>
+                <ul class="list-group list-group-flush custom-list">
+                    <li class="list-group-item">
+                        <a href="{% url 'alumni:job_list' %}" class="quick-link">
+                            <i class="fas fa-briefcase"></i> Browse Jobs
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'alumni:mentorship_list' %}" class="quick-link">
+                            <i class="fas fa-user-graduate"></i> Find a Mentor
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'alumni:success_story_create' %}" class="quick-link">
+                            <i class="fas fa-award"></i> Share Your Success
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .welcome-title {
+        background: linear-gradient(45deg, #FFD700, #FFA500);  /* Gold to Orange gradient */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-title {
+        background: linear-gradient(45deg, #FF6B6B, #FFE66D);  /* Coral to Light Yellow */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .gradient-text {
+        background: linear-gradient(45deg, #FFE66D, #FF6B6B);  /* Light Yellow to Coral */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .no-content-message {
+        color: #efbf2f;  /* Light Yellow */
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-link i {
+        margin-right: 1rem;
+    }
+
+    .quick-links-card {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        color: #2563eb;
+        text-decoration: none;
+        padding: 0.5rem 0;
+        transition: transform 0.2s ease;
+    }
+
+    .quick-link:hover {
+        color: #FF6B6B;  /* Coral */
+        transform: translateX(10px);
+    }
+
+    .btn-glow {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-glow::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        animation: glow 2s infinite;
+    }
+
+    /* Animations */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .animate-slide-left {
+        animation: slideLeft 0.8s ease-out;
+    }
+
+    .animate-scale {
+        animation: scale 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideLeft {
+        from { transform: translateX(50px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes scale {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes glow {
+        0% { transform: rotate(45deg) translateX(-100%); }
+        100% { transform: rotate(45deg) translateX(100%); }
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #2563eb;
+        color: #2563eb;
+        transition: all 0.3s ease;
+        background: linear-gradient(45deg, #c2f8dd, #7cedb5);
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(45deg, #2563eb, #1d4ed8);
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+</style>
+{% endblock %}

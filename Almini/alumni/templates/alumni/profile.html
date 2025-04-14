@@ -1,0 +1,581 @@
+{% extends 'alumni/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card profile-card">
+                <div class="card-header bg-gradient text-white py-4">
+                    <div class="d-flex align-items-center">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="Profile Photo" class="header-profile-photo me-4">
+                        {% else %}
+                        <div class="header-profile-placeholder me-4" style="border-color: black;">
+                            <i class="fas fa-user" style="color: black;"></i>
+                        </div>
+                        
+                        {% endif %}
+                        <div class="header-text">
+                            <h2 class="mb-1 fw-bold text-shadow" style="color: navy;">{{ profile.user.get_full_name }}</h2>
+                            <p class="mb-0" style="color:navy ;">{{ profile.department }} • Class of {{ profile.graduation_year }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-5">
+                        <div class="col-md-5">
+                            <div class="profile-info-card">
+                                <div class="info-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h5>Basic Information</h5>
+                                <!-- Add this inside the Basic Information section, after the graduation year -->
+                                <div class="info-item">
+                                    <span class="label">Email</span>
+                                    <span class="value">{{ profile.user.email }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Department</span>
+                                    <span class="value">{{ profile.department }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Passing Year</span>
+                                    <span class="value">{{ profile.graduation_year }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Designation</span>
+                                    <span class="value">{{ profile.get_designation_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                           <!-- Add this new div after the Basic Information card -->
+                        
+                        <div class="col-md-7 col-sm-10 col-12 mb-3">
+                            <div class="profile-form-card">
+                                <h5 class="section-title">Update Profile</h5>
+                                <!-- Add this right after the form opening tag -->
+                                <form method="POST" enctype="multipart/form-data" id="profileForm">
+                                    {% csrf_token %}
+                                    <div class="row g-4">
+                                        <!-- Profile Photo Upload -->
+                                        <div class="col-md-12 mb-4">
+                                            <div class="form-group">
+                                                <label class="form-label">Profile Photo</label>
+                                                <div class="photo-upload-container">
+                
+                                                    <div class="custom-file">
+                                                        <div style="display: none;"> {{ form.photo|add_class:"form-control photo-input visually-hidden" }}
+                                                        </div>
+                                                        <label class="btn btn-outline-primary" for="{{ form.photo.id_for_label }}">
+                                                            Upload Photo
+                                                        </label>
+                                                        <span class="selected-file-name ms-2"></span>
+                                                    </div>
+                                                    <small class="text-muted mt-2 d-block">Upload a profile photo (JPG, PNG, max 5MB)</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Existing fields -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Current job</label>
+                                                {{ form.current_job|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                        <!-- Company field -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Company</label>
+                                                {{ form.company|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                        <!-- Location field -->
+                                        <!-- Add this after the location field in the profile form -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Location</label>
+                                                {{ form.location|add_class:"form-control" }}
+                                            </div>
+                                        </div>
+                                        <!-- Mentor checkbox (only show if not student) -->
+                                        <!-- Remove the if condition and add this after the location field -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Designation</label>
+                                                <select name="designation" class="form-control">
+                                                    <option value="student" {% if profile.designation == 'student' %}selected{% endif %}>Student</option>
+                                                    <option value="working" {% if profile.designation == 'working' %}selected{% endif %}>Working Professional</option>
+                                                    <option value="teacher" {% if profile.designation == 'teacher' %}selected{% endif %}>Teacher</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Keep the mentor checkbox conditional -->
+                                        {% if profile.designation != 'student' %}
+                                        <div class="col-md-6">
+                                            <div class="form-group mentor-check">
+                                                {% if profile.is_mentor %}
+                                                    <div class="mentor-status">
+                                                        <span class="badge bg-success mb-2">You are a Mentor</span>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" name="is_mentor" class="form-check-input" id="{{ form.is_mentor.id_for_label }}" checked>
+                                                            <label class="form-check-label" for="{{ form.is_mentor.id_for_label }}">
+                                                                Continue as mentor
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="is_mentor" class="form-check-input" id="{{ form.is_mentor.id_for_label }}">
+                                                        <label class="form-check-label" for="{{ form.is_mentor.id_for_label }}">
+                                                            Would you like to become a mentor?
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary btn-glow">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="activities-section">
+                        <h4 class="section-title">My Activities</h4>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="activity-card jobs">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <h3 class="activity-count">{{ profile.job_set.count }}</h3>
+                                    <h5>Post Job</h5>
+                                    <a href="{% url 'alumni:job_create' %}" class="btn btn-outline-primary">Post New Job</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="activity-card stories">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <h3 class="activity-count">{{ profile.successstory_set.count }}</h3>
+                                    <h5>Success Stories</h5>
+                                    <a href="{% url 'alumni:success_story_create' %}" class="btn btn-outline-primary">Share Story</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="activity-card events">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <h3 class="activity-count">{{ profile.eventattendance_set.count }}</h3>
+                                    <h5>Event RSVPs</h5>
+                                    <a href="{% url 'alumni:event_list' %}" class="btn btn-outline-primary">View Events</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('.photo-input').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        document.querySelector('.selected-file-name').textContent = fileName || '';
+    });
+
+    // Modified form submission handler
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        await fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        });
+
+        Swal.fire({
+            title: 'Success!',
+            text: 'Profile updated successfully!',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'rounded-popup'
+            }
+        }).then(() => {
+            window.location.reload();
+        });
+    });
+</script>
+
+
+<style>
+    .profile-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .card-header.bg-gradient {
+        background: linear-gradient(135deg, #4338ca, #6366f1);
+        border-bottom: none;
+    }
+
+    .header-profile-photo {
+        width: 150px;  /* Increased from 80px */
+        height: 170px; /* Increased from 80px */
+        border-radius: 7%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+   
+    .header-profile-placeholder {
+        width: 10px;  /* Increased from 80px */
+        height: 10px; /* Increased from 80px */
+        border-radius: 10%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-profile-placeholder i {
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .text-white-75 {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .profile-info-card {
+        /* background: #f8fafc; */
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .info-icon {
+        font-size: 2rem;
+        color: #4f46e5;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-item .label {
+        display: block;
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-item .value {
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .profile-form-card {
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+        color: #1e293b;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(45deg, #4f46e5, #6366f1);
+        border-radius: 3px;
+    }
+
+    .activity-card {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .activity-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .activity-icon {
+        font-size: 2rem;
+        color: #4f46e5;
+        margin-bottom: 1rem;
+    }
+
+    .activity-count {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-glow {
+        background: linear-gradient(45deg, #4f46e5, #6366f1);
+        border: none;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-glow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+.form-floating {
+    position: relative;
+}
+
+.form-floating > .form-control {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out,transform .1s ease-in-out;
+    color: #64748b;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: .65;
+    transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+    background: white;
+    padding: 0 0.5rem;
+    margin-left: -0.5rem;
+}
+
+.error-feedback {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.form-control {
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.form-control:hover {
+    background: white;
+}
+
+.form-control:focus {
+    background: white;
+    transform: translateY(-2px);
+}
+
+.btn-glow i {
+    font-size: 0.9rem;
+}
+
+
+.form-select {
+    height: 45px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px 12px;
+}
+
+.form-select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    background-color: white;
+}
+
+.form-select:hover {
+    background-color: white;
+}
+
+
+/* Add these new styles */
+.custom-checkbox {
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+.custom-checkbox:hover {
+    background: white;
+    border-color: #e2e8f0;
+}
+
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.25em;
+    margin-right: 0.5em;
+    background-color: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.25em;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-check-input:checked {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.form-check-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.form-check-label {
+    color: #1e293b;
+    font-weight: 500;
+    user-select: none;
+}
+
+/* Update header styles */
+.card-header.bg-gradient {
+    background: linear-gradient(135deg, #312e81, #4338ca);
+    position: relative;
+}
+
+/* photo bg */
+.card-header.bg-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: lightgray;
+}
+
+.header-text {
+    position: relative;
+    z-index: 1;
+}
+
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.text-shadow-sm {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Update profile photo styles */
+.header-profile-photo,
+.header-profile-placeholder {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.photo-upload-container {
+    padding: 15px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 2px dashed #e2e8f0;
+}
+
+.preview-photo {
+    max-width: 200px;    /* Increased from 150px */
+    max-height: 200px;   /* Increased from 150px */
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.photo-input {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+}
+
+.photo-input:hover {
+    border-color: #4f46e5;
+    .custom-file {
+    position: relative;
+    display: inline-block;
+}
+
+.selected-file-name {
+    color: #666;
+    font-size: 0.9rem;
+
+}
+}
+
+</style>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,511 @@
+{% extends 'alumni/base.html' %}
+{% block title %}Post New Job{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient text-white position-relative">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon">
+                            <i class="fas fa-briefcase fa-2x" style="color: black;"></i>
+                        </div>
+                        <div class="header-content">
+                            <h3 class="mb-1" style="color: blue;">Post New Job Opportunity</h3>
+                            <p class="mb-0 text-white-50">Share job opportunities with the alumni community</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add these styles -->
+                <style>
+                    .card-header {
+                        background: linear-gradient(135deg, #2962ff, #1565c0);
+                        border-radius: 15px 15px 0 0;
+                        padding: 2rem;
+                    }
+
+                    .header-icon {
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 12px;
+                        padding: 1rem;
+                        margin-right: 1.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        backdrop-filter: blur(5px);
+                    }
+
+                    .header-icon i {
+                        color: white;
+                        font-size: 2.5rem;
+                    }
+
+                    .header-content h3 {
+                        font-weight: 700;
+                        font-size: 1.75rem;
+                        letter-spacing: 0.5px;
+                        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .header-content p {
+                        font-size: 1rem;
+                        opacity: 0.9;
+                        letter-spacing: 0.3px;
+                    }
+                </style>
+                <div class="card-body p-4">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="form-section-title">Job Information</div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Job Title</label>
+                                {{ form.title }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Company Name</label>
+                                {{ form.company_name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Location</label>
+                                {{ form.location }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Job Type</label>
+                                {{ form.job_type }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Stream</label>
+                                {{ form.stream }}
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Eligibility & Details</div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Batch Required</label>
+                                {{ form.batch_required }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Experience Required</label>
+                                {{ form.experience_required }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Application Deadline</label>
+                                {{ form.application_deadline }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Enter Salary (₹)</label>
+                                {{ form.salary }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Skills Required</label>
+                            {{ form.skills_required }}
+                        </div>
+
+                        <div class="form-section-title">Job Description</div>
+                        <div class="mb-3">
+                            <label class="form-label">Key Responsibilities</label>
+                            {{ form.responsibilities }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Total Openings</label>
+                            {{ form.total_openings }}
+                        </div>
+            
+                            <div class="mb-4">
+                                <label class="form-label">Recruiting Person Details</label>
+                                <small class="text-muted d-block mb-2">Enter contact information and additional details</small>
+                                {{ form.Recruiter_details }}
+                            
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Application Link</label>
+                            {{ form.apply_link }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Hiring-Workflow</label>
+                            {{ form.hiring_workflow }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'alumni:job_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane me-1"></i>Post Job
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: #f0f4f8;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #3f51b5, #1a237e);
+        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        color: white;
+    }
+
+    .card-header i {
+        color: white;
+    }
+
+    h3 {
+        font-weight: 600;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #263238;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #1a237e;
+        padding-left: 0.75rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: 0.3s ease;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 0.2rem rgba(63, 81, 181, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #3f51b5, #1a237e);
+        border: none;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #1a237e, #3f51b5);
+        transform: scale(1.02);
+    }
+
+    .btn-outline-secondary:hover {
+        transform: scale(1.02);
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #37474F;
+    }
+
+    .form-label:after {
+        content: "*";
+        color: #f44336;
+        margin-left: 4px;
+    }
+
+    .form-label[for="experience_required"]:after,
+    .form-label[for="job_type"]:after,
+    .form-label[for="stream"]:after {
+        content: none;
+    }
+</style>
+
+<style>
+    body {
+        background: #f0f4f8;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #3f51b5, #1a237e);
+        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        color: white;
+    }
+
+    .card-header i {
+        color: white;
+    }
+
+    h3 {
+        font-weight: 600;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #263238;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #1a237e;
+        padding-left: 0.75rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: 0.3s ease;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 0.2rem rgba(63, 81, 181, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #3f51b5, #1a237e);
+        border: none;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #1a237e, #3f51b5);
+        transform: scale(1.02);
+    }
+
+    .btn-outline-secondary:hover {
+        transform: scale(1.02);
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #37474F;
+    }
+
+    .form-label:after {
+        content: "*";
+        color: #f44336;
+        margin-left: 4px;
+    }
+
+    .form-label[for="experience_required"]:after,
+    .form-label[for="job_type"]:after,
+    .form-label[for="stream"]:after {
+        content: none;
+    }
+</style>
+
+<style>
+    .alert {
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+</style>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+    })();
+</script>
+
+<!-- Add this before the closing body tag -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please fill in all mandatory fields marked with an asterisk (*).
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: #f0f4f8;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #3f51b5, #1a237e);
+        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        color: white;
+    }
+
+    .card-header i {
+        color: white;
+    }
+
+    h3 {
+        font-weight: 600;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #263238;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #1a237e;
+        padding-left: 0.75rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: 0.3s ease;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 0.2rem rgba(63, 81, 181, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #3f51b5, #1a237e);
+        border: none;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #1a237e, #3f51b5);
+        transform: scale(1.02);
+    }
+
+    .btn-outline-secondary:hover {
+        transform: scale(1.02);
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #37474F;
+    }
+
+    .form-label:after {
+        content: "*";
+        color: #f44336;
+        margin-left: 4px;
+    }
+
+    .form-label[for="experience_required"]:after,
+    .form-label[for="job_type"]:after,
+    .form-label[for="stream"]:after {
+        content: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const mandatoryFields = form.querySelectorAll('input[required], textarea[required], select[required]');
+        
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            mandatoryFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                event.preventDefault();
+                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            }
+        });
+        
+        // Remove invalid class on input
+        mandatoryFields.forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+        
+        // Auto-dismiss success messages
+        const successAlert = document.querySelector('.alert-success');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.classList.remove('show');
+                setTimeout(() => successAlert.remove(), 150);
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

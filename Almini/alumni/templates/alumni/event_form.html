@@ -1,0 +1,135 @@
+{% extends 'alumni/base.html' %}
+
+{% block title %}Create Event{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-lg border-0 rounded-4 mb-5">
+            <div class="card-header bg-primary text-white py-3 rounded-top-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-calendar-plus-fill me-2"></i>Create New Event
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-type-h1 me-1"></i>Event Title
+                        </label>
+                        {{ form.title }}
+                        {{ form.title.errors }}
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-calendar-event me-1"></i>Date and Time
+                            </label>
+                            {{ form.date }}
+                            {{ form.date.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-geo-alt me-1"></i>Location
+                            </label>
+                            {{ form.location }}
+                            {{ form.location.errors }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i>Organizer
+                            </label>
+                            {{ form.organizer }}
+                            {{ form.organizer.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-mic me-1"></i>Speakers
+                            </label>
+                            {{ form.speakers }}
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-info-circle me-1"></i>Optional - Leave blank if no speakers
+                            </small>
+                            {{ form.speakers.errors }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-people me-1"></i>Event Capacity
+                            </label>
+                            {{ form.capacity }}
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-info-circle me-1"></i>Maximum number of attendees
+                            </small>
+                            {{ form.capacity.errors }}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-text-paragraph me-1"></i>Description
+                        </label>
+                        {{ form.description }}
+                        {{ form.description.errors }}
+                    </div>
+                    <div class="d-flex gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-calendar-plus me-2"></i>Create Event
+                        </button>
+                        <a href="{% url 'alumni:event_list' %}" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-x-circle "></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    
+    .form-label {
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-image: none;
+    }
+</style>
+{% endblock %}

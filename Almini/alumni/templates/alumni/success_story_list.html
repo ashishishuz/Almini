@@ -1,0 +1,338 @@
+{% extends 'alumni/base.html' %}
+{% block title %}Success Stories{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="golden-sparkle">Alumni Success Stories</h2>
+        <a href="{% url 'alumni:success_story_create' %}" class="btn btn-primary">Share Your Story</a>
+    </div>
+
+    <div class="row">
+        {% for story in success_stories %}
+            <div class="col-sm-12 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ story.title }}</h4>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            By {{ story.alumni.user.get_full_name }} ({{ story.alumni.graduation_year }})
+                        </h6>
+    
+                        {% if story.image %}
+                        <div class="mb-3 text-center">
+                            <img src="{{ story.image.url }}" alt="Success Story Image" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 250px; width: 350px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+    
+                        <p class="card-text">{{ story.content|linebreaks|truncatewords:50 }}</p>
+    
+                        <!-- Like Button -->
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <button class="btn btn-outline-primary btn-sm like-btn" data-story-id="{{ story.id }}">
+                                <i class="fas fa-thumbs-up {% if request.user in story.likes.all %}liked{% else %}not-liked{% endif %}"></i>
+                            </button>
+                            <span class="like-count">{{ story.likes.count }}</span>
+                        </div>
+    
+                        <!-- Comments Section -->
+                        <div class="comments-section">
+                            <button class="btn btn-outline-primary btn-sm mb-2 show-comment-form">
+                                <i class="fa fa-comment" style="color: rgb(66, 9, 250);"></i> Comment
+                            </button>
+                            <form class="comment-form d-none" data-story-id="{{ story.id }}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="comment" placeholder="Write a comment..." required>
+                                    <button type="submit" class="btn btn-primary">Comment</button>
+                                    <button type="button" class="btn close-comment-form" style="background: none; border: none;">
+                                        <i class="fas fa-times" style="color: red;"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+    
+                        <h6 class="comments-toggle" style="cursor: pointer;">
+                            Comments (<span class="comment-count">{{ story.comments.count }}</span>)
+                        </h6>
+                        <div class="comments-list mb-3" id="comments-{{ story.id }}">
+                            {% if story.comments.all %}
+                                {% with latest_comment=story.comments.all|first %}
+                                <div class="comment border-bottom py-2" id="comment-{{ latest_comment.id }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <i class="fa fa-user" style="border: 2px solid #000; border-radius: 25%; padding: 4px;"></i>
+                                            <strong>{{ latest_comment.user.get_full_name }}</strong>
+                                            <small class="text-muted">{{ latest_comment.created_at|timesince }} ago</small>
+                                        </div>
+                                        {% if latest_comment.user == request.user %}
+                                        <button class="btn btn-sm btn-link text-danger delete-comment" data-comment-id="{{ latest_comment.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    <p class="mb-0">{{ latest_comment.content }}</p>
+                                </div>
+                                {% endwith %}
+    
+                                <div class="all-comments d-none">
+                                    {% for comment in story.comments.all|slice:"1:" %}
+                                    <div class="comment border-bottom py-2" id="comment-{{ comment.id }}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ comment.user.get_full_name }}</strong>
+                                                <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                            </div>
+                                            {% if comment.user == request.user %}
+                                            <button class="btn btn-sm btn-link text-danger delete-comment" data-comment-id="{{ comment.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-0">{{ comment.content }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="no-comments text-muted">No comments yet. Be the first to comment!</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted" style="background-color: rgb(241, 218, 218);">
+                        Posted on <i class="fa fa-calendar-alt" style="color: #002fff;"></i> {{ story.date_posted|date:"F d, Y" }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if not success_stories %}
+    <div class="alert alert-info">
+        No success stories have been shared yet. Be the first to share your story!
+    </div>
+    {% endif %}
+    
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like functionality
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            const storyId = this.dataset.storyId;
+            try {
+                const response = await fetch(`/success-stories/${storyId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    }
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    const icon = this.querySelector('i');
+                    icon.style.color = icon.style.color === 'blue' ? 'gray' : 'blue';
+                    const likeCount = this.nextElementSibling;
+                    likeCount.textContent = data.like_count;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    // Comment functionality
+    // Show comment form on button click
+    document.querySelectorAll('.show-comment-form').forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.nextElementSibling;
+            form.classList.remove('d-none');
+            form.querySelector('input').focus();
+            this.classList.add('d-none');
+        });
+    });
+
+    // Hide form and show button when comment is posted
+    document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const storyId = this.dataset.storyId;
+            const input = this.querySelector('input[name="comment"]');
+            const content = input.value.trim();
+            const commentsList = document.querySelector(`#comments-${storyId}`);
+    
+            if (!content) return;
+    
+            try {
+                const response = await fetch(`/success-stories/${storyId}/comment/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content })
+                });
+    
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    input.value = '';
+                    
+                    const noComments = commentsList.querySelector('.no-comments');
+                    if (noComments) noComments.remove();
+    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.textContent = data.content;
+                    const safeContent = contentDiv.textContent;
+    
+                    const newComment = `
+                        <div class="comment border-bottom py-2" id="comment-${data.comment_id}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>${data.user_name}</strong>
+                                    <small class="text-muted">just now</small>
+                                </div>
+                                <button class="btn btn-sm btn-link text-danger delete-comment" 
+                                        data-comment-id="${data.comment_id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <p class="mb-0">${safeContent}</p>
+                        </div>
+                    `;
+                    commentsList.insertAdjacentHTML('afterbegin', newComment);
+                    
+                    const countSpan = commentsList.parentElement.querySelector('.comment-count');
+                    countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to add comment. Please try again.');
+            }
+        });
+    });
+
+     // Add close button functionality
+     document.querySelectorAll('.close-comment-form').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        const form = this.closest('.comment-form');
+                                        const showButton = form.previousElementSibling;
+                                        form.classList.add('d-none');
+                                        showButton.classList.remove('d-none');
+                                    });
+                                });
+
+    // Delete comment functionality
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.delete-comment')) {
+            const button = e.target.closest('.delete-comment');
+            const commentId = button.dataset.commentId;
+            const comment = document.getElementById(`comment-${commentId}`);
+            const commentsList = comment.closest('.comments-list');
+
+            try {
+                const response = await fetch(`/success-stories/comment/${commentId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    }
+                });
+
+                if (response.ok) {
+                    comment.remove();
+                    
+                    const countSpan = commentsList.parentElement.querySelector('.comment-count');
+                    const newCount = parseInt(countSpan.textContent) - 1;
+                    countSpan.textContent = newCount;
+
+                    if (newCount === 0) {
+                        commentsList.innerHTML = '<div class="no-comments text-muted">No comments yet. Be the first to comment!</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    });
+});
+document.querySelectorAll('.comments-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function() {
+        const commentsSection = this.nextElementSibling;
+        const allComments = commentsSection.querySelector('.all-comments');
+        if (allComments) {
+            allComments.classList.toggle('d-none');
+        }
+    });
+});
+</script>
+
+<style>
+.like-btn i.liked {
+    color: #002fff;
+}
+
+.like-btn i.not-liked {
+    color: #6c757d;
+}
+
+.like-btn {
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+}
+
+.like-btn:hover {
+    transform: scale(1.05);
+}
+
+.comment {
+    transition: background-color 0.2s ease;
+}
+
+.comment:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.input-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+.golden-sparkle {
+    color: #FFD900;
+background: linear-gradient(
+  90deg,
+  #FFD700,
+  #FFCC00,
+  #fff4b0,
+  #FFD700,
+  #FFCC00
+);
+text-shadow: 0 0 2px #FFD700, 0 0 2px #FFA500, 0 0 2px #FFD700;
+position: relative;
+display: inline-block;
+animation: shine 2s infinite linear;
+background-size: 300% auto;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;   
+
+}
+
+@keyframes shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+</style>
+
+
+{% endblock %}

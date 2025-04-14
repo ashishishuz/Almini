@@ -1,0 +1,43 @@
+{% extends 'alumni/base.html' %}
+
+{% block title %}Share Your Success Story{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3>Share Your Success Story</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" required
+                               placeholder="Give your story a compelling title">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Your Story</label>
+                        <textarea class="form-control" name="content" rows="10" required
+                                  placeholder="Share your journey, achievements, and advice for fellow alumni"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Upload Image (Optional)</label>
+                        <input type="file" class="form-control" name="image" accept="image/*"
+                               aria-describedby="imageHelp">
+                        <div id="imageHelp" class="form-text">
+                            Upload an image of your certificate, award, or any relevant achievement. Max size: 5MB
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <small>Your story will be reviewed by administrators before being published.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Story</button>
+                    <a href="{% url 'alumni:success_story_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

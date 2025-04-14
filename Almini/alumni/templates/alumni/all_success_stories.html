@@ -1,0 +1,68 @@
+{% extends 'alumni/base.html' %}
+
+{% block title %}All Success Stories{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>All Success Stories</h2>
+                <a href="{% url 'alumni:success_story_create' %}" class="btn btn-primary">Share Your Story</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for story in all_stories %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ story.title }}</h4>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            By {{ story.alumni.user.get_full_name }} ({{ story.alumni.graduation_year }})
+                        </h6>
+                        <p class="card-text">{{ story.content|linebreaks }}</p>
+                        
+                        <!-- Like and Comment sections -->
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <button class="btn btn-outline-primary btn-sm like-btn" 
+                                    data-story-id="{{ story.id }}">
+                                <i class="bi {% if story.id in liked_stories %}bi-hand-thumbs-up-fill{% else %}bi-hand-thumbs-up{% endif %}"></i>
+                                <span class="like-count">{{ story.story_likes.count }}</span> Likes
+                            </button>
+                        </div>
+
+                        <div class="comments-section">
+                            <h6>Comments ({{ story.story_comments.count }})</h6>
+                            <div class="comments-list mb-3" id="comments-{{ story.id }}">
+                                {% for comment in story.story_comments.all %}
+                                    <div class="comment border-bottom py-2">
+                                        <strong>{{ comment.user.get_full_name }}</strong>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                        <p class="mb-0">{{ comment.content }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <form class="comment-form" data-story-id="{{ story.id }}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Write a comment..." required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-send"></i> Post
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Posted on {{ story.date_posted|date:"F d, Y" }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

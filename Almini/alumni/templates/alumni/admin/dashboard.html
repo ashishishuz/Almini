@@ -1,0 +1,319 @@
+{% extends 'alumni/admin/base_admin.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 text-white dashboard-title">
+        <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+    </h2>
+    
+    <div class="row mb-4 g-4">
+        <div class="col-md-4">
+            <div class="stat-card bg-gradient-primary">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5 class="card-title mb-1">Total Events</h5>
+                            <h2 class="mb-0">{{ total_events }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card bg-gradient-success">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5 class="card-title mb-1">Active Mentorships</h5>
+                            <h2 class="mb-0">{{ total_mentorships }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'alumni:admin_alumni_list' %}" class="text-decoration-none">
+                <div class="stat-card bg-gradient-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="card-title mb-1">Alumni</h5>
+                                <h2 class="mb-0">{{ total_alumni }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-clock me-2"></i>
+                    <h5 class="mb-0">Pending Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_events %}
+                        {% for event in pending_events %}
+                            <div class="event-item">
+                                <h6 class="event-title">{{ event.title }}</h6>
+                                <p class="text-muted small">
+                                    <i class="far fa-calendar me-1"></i>{{ event.date|date:"F d, Y" }}
+                                </p>
+                                <form method="POST" action="{% url 'alumni:approve_event' event.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm action-btn">
+                                        <i class="fas fa-check me-1"></i>Approve
+                                    </button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm action-btn">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">No pending events</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-handshake me-2"></i>
+                    <h5 class="mb-0">Active Mentorships</h5>
+                </div>
+                <div class="card-body">
+                    {% if mentorship_pairs %}
+                        {% for pair in mentorship_pairs %}
+                            <div class="mentorship-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mentor-name">
+                                            <i class="fas fa-user-tie me-1"></i>Mentor: {{ pair.mentor.user.get_full_name }}
+                                        </h6>
+                                        <p class="mentee-name mb-0">
+                                            <i class="fas fa-user me-1"></i>Student:{{ pair.mentee.user.get_full_name }}
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock me-1"></i>{{ pair.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">No active mentorships</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- After the mentorship pairs div.col-md-6, add this new section -->
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="content-card">
+                        <div class="card-header d-flex align-items-center">
+                            <i class="fas fa-star me-2"></i>
+                            <h5 class="mb-0">Pending Success Stories</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if pending_stories %}
+                                {% for story in pending_stories %}
+                                    <div class="event-item">
+                                        <h6 class="event-title">{{ story.title }}</h6>
+                                        <p class="text-muted small">
+                                            <i class="far fa-user me-1"></i>{{ story.alumni.user.get_full_name }}
+                                            <span class="mx-2">•</span>
+                                            <i class="fas fa-briefcase me-1"></i><span>{{ story.alumni.designation }}</span><br>
+                                            <i class="far fa-clock me-1"></i>{{ story.date_posted|date:"F d, Y" }}
+                                        </p>
+                                        <div class="story-content mb-3" style="color: black;">
+                                            <i class="fas fa-quote-left text-muted me-2"></i>
+                                            {{ story.content }}
+                                        </div>
+                                        <!-- <div class="story-content mb-3">{{ story.content|truncatewords:50 }}</div> -->
+                                        <form method="POST" action="{% url 'alumni:approve_success_story' story.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm action-btn">
+                                                <i class="fas fa-check me-1"></i>Approve
+                                            </button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm action-btn">
+                                                <i class="fas fa-times me-1"></i>Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted text-center py-4">No pending success stories for approval</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-title {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    color: white;
+    overflow: hidden;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(45deg, #1cc88a, #13855c);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(45deg, #36b9cc, #258391);
+}
+
+.stat-icon {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.content-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-header {
+    background: linear-gradient(45deg, rgba(78, 115, 223, 0.1), rgba(54, 185, 204, 0.1));
+    border-bottom: none;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.card-header i {
+    font-size: 1.5rem;
+    color: #4e73df;
+    margin-right: 1rem;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #2c3e50;
+    letter-spacing: 0.5px;
+}
+
+.event-item, .mentorship-item {
+    background: rgba(255, 255, 255, 0.7);
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.event-item:hover, .mentorship-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.event-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+}
+
+.mentor-name {
+    color: #4e73df;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.mentee-name {
+    color: #1cc88a;
+}
+
+.action-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-right: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn i {
+    font-size: 0.9rem;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #1cc88a, #13855c);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #e74a3b, #be2617);
+    border: none;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: #1084ea;
+    font-size: 1.1rem;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 1.5rem;
+    border-radius: 10px;
+    font-style: italic;
+    color: #495057;
+    position: relative;
+}
+
+.story-content .fa-quote-left {
+    font-size: 1.2rem;
+    opacity: 0.5;
+    
+}
+</style>
+{% endblock %}
